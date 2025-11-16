@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>لوحة تحكم المسؤول</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600&display=swap');
+
+body {
+  margin: 0;
+  font-family: 'Cairo', sans-serif;
+  background: #f5f5f5;
+}
+
+.header {
+  background: linear-gradient(45deg,#00aaff,#8a2be2,#ff69b4);
+  color: white;
+  padding: 20px 30px;
+  display: flex;
+  align-items:flex-start;
+  justify-content:center;
+  font-size: 18px;
+  font-weight: bold;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+}
+
+.header img {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 45px;
+  width: 45px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0 8px rgba(255,255,255,0.7);
+}
+
+.add-panel button,
+.custom-file-label,
+#ragBtn,
+#deleteBtn,
+#logoutBtn {
+  transition: 0.3s;
+  cursor: pointer;
+}
+
+.add-panel button:hover,
+.custom-file-label:hover,
+#ragBtn:hover,
+#deleteBtn:hover,
+#logoutBtn:hover {
+  transform: scale(1.05);
+  background: linear-gradient(45deg,#ff69b4,#8a2be2,#00aaff);
+}
+
+#logoutBtn { left: 20px; }
+#deleteBtn { left: 75px; }
+#ragBtn { left: 130px; }
+
+.container {
+  width: 90%;
+  max-width: 950px;
+  margin: 40px auto;
+  background: #fff;
+  padding: 60px 25px 25px 25px;
+  border-radius: 20px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.1);
+}
+
+.add-panel {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.add-panel input[type=text] {
+  flex: 1;
+  padding: 10px;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  outline: none;
+}
+
+.custom-file-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 2px solid #ccc;
+  border-radius: 20px;
+  background: linear-gradient(45deg,#00aaff,#8a2be2,#ff69b4);
+  color: #fff;
+  font-weight: bold;
+  font-size: 13px;
+}
+
+.custom-file-label svg {
+  width: 14px;
+  height: 14px;
+  fill: #fff;
+}
+
+.add-panel button {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 25px;
+  background: linear-gradient(45deg,#00aaff,#8a2be2,#ff69b4);
+  color: #fff;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.search-panel {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 5px;
+  align-items: center;
+}
+
+.search-panel input[type=text],
+.search-panel select {
+  flex: 2;
+  padding: 10px;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  outline: none;
+  background: #fff;
+}
+
+.search-panel select { flex: 0.8; }
+
+.search-panel img {
+  width: 35px;
+  height: 35px;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.search-panel img:hover { transform: scale(1.05); }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  direction: rtl;
+}
+
+table, th, td { border: 1px solid #ccc; }
+
+th, td { padding: 12px; text-align: right; vertical-align: top; }
+
+th {
+  background: linear-gradient(45deg,#00aaff,#8a2be2,#ff69b4);
+  color: white;
+}
+
+table th { padding: 8px; height: 20px; }
+
+td.editable { cursor: text; }
+td.editable:hover { background-color: #f0f8ff; }
+
+.ss-icon {
+  height: 25px;
+  width: 25px;
+  vertical-align: middle;
+  margin-left: 5px;
+  cursor: pointer;
+}
+
+tr.selected-row { background-color: #d1e7ff; }
+
+.file-preview { margin-top: 8px; }
+.file-preview img { max-width: 150px; border-radius: 10px; }
+.file-preview a { color: #007bff; text-decoration: none; }
+.file-preview a:hover { text-decoration: underline; }
+
+#ragText {
+  position: absolute;
+  top: 50%;
+  left: 180px;
+  transform: translateY(-50%);
+  font-weight: bold;
+  color: white;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <img id="logoutBtn" src="{{ url_for('static', filename='adminicon.png') }}" alt="Logout" onclick="logoutAdmin()">
+  <img id="deleteBtn" src="{{ url_for('static', filename='nn.png') }}" alt="Delete" onclick="deleteSelected()" title="Delete Selected">
+  <img id="ragBtn" src="{{ url_for('static', filename='artificial-intelligence.png') }}" alt="نظام RAG">
+  <span id="ragText">نظام RAG</span>
+  لوحة تحكم المسؤول
+</div>
+
+<div class="container">
+
+  <form id="addForm" class="add-panel" enctype="multipart/form-data">
+    <input type="text" name="content" id="addContent" placeholder="أدخل نص المطلوب تخزينة">
+    
+    <label for="addFile" class="custom-file-label">
+      <span id="fileLabelText">اختر ملفًا</span>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+        <path d="M.5 9.9a.5.5 0 0 1 .5.5v3.1h14V10.4a.5.5 0 0 1 1 0v3.1a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1V10.4a.5.5 0 0 1 .5-.5z"/>
+        <path d="M7.646 1.146a.5.5 0 0 1 .708 0L11 3.793V10.5a.5.5 0 0 1-1 0V4.707L8 2.707 4 6.707V10.5a.5.5 0 0 1-1 0V3.793l3.646-2.647z"/>
+      </svg>
+    </label>
+    <input type="file" name="file" id="addFile" hidden>
+    
+    <button type="submit">إضافة</button>
+  </form>
+
+  <div class="search-panel">
+    <input type="text" id="searchQuery" placeholder="بحث..." oninput="searchOnInput()">
+    <select id="searchType">
+      <option value="id">بحث عن طريقID</option>
+      <option value="text">بحث عن طريق النص </option>
+    </select>
+    <img src="{{ url_for('static', filename='check.png') }}" alt="search" onclick="performSearch()">
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>المحتوى</th>
+        <th> تعديل</th>
+      </tr>
+    </thead>
+    <tbody id="resultsBody">
+      {% for item in data %}
+      <tr data-id="{{ item.id }}">
+        <td>{{ item.id }}</td>
+        
+        <td class="editable" contenteditable="false">
+            <span class="edit-text" contenteditable="true">
+                {% if item.content %}{{ item.content|safe }}{% endif %}
+            </span>
+
+          {% if item.file_url %}
+          <div class="file-preview">
+            {% if item.file_url.endswith('.jpg') or item.file_url.endswith('.png') or item.file_url.endswith('.jpeg') %}
+              <img src="{{ item.file_url }}" alt="file">
+            {% else %}
+              <a href="{{ item.file_url }}" target="_blank">📎 تحميل الملف</a>
+            {% endif %}
+          </div>
+          {% endif %}
+        </td>
+
+        <td class="modified-cell"></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<script>
+function logoutAdmin() { window.location.href = "{{ url_for('logout') }}"; }
+
+document.getElementById('ragBtn').addEventListener('click', function() {
+    window.location.href = "{{ url_for('index_public') }}";
+});
+
+const fileInput = document.getElementById('addFile');
+const fileLabelText = document.getElementById('fileLabelText');
+fileInput.addEventListener('change', () => {
+  fileLabelText.textContent = fileInput.files.length > 0 ? fileInput.files[0].name : 'اختر ملفًا';
+});
+
+// ---------------- تعديل الخلايا ----------------
+function attachEditable(td) {
+  const row = td.parentElement;
+  const span = td.querySelector(".edit-text");
+  const modifiedCell = row.querySelector('.modified-cell');
+
+  let original = span.textContent.trim();
+
+  span.addEventListener('input', () => {
+    let existingCheck = modifiedCell.querySelector('img');
+
+    if (span.textContent.trim() !== original) {
+
+      if (!existingCheck) {
+        const check = document.createElement('img');
+        check.src = "{{ url_for('static', filename='ss.png') }}";
+        check.className = 'ss-icon';
+        check.title = 'اضغط للحفظ';
+
+        check.addEventListener('click', async () => {
+          const id = row.dataset.id;
+          const newContent = span.textContent.trim();
+
+          const form = new FormData();
+          form.append('id', id);
+          form.append('content', newContent);
+
+          try {
+            const res = await fetch("{{ url_for('update_item') }}", { method: 'POST', body: form });
+            const data = await res.json();
+
+            if (data.success) {
+              original = newContent;
+              span.textContent = newContent;
+              check.remove();
+            } else {
+              alert("فشل في التحديث");
+            }
+
+          } catch {
+            alert("حدث خطأ أثناء التحديث");
+          }
+        });
+
+        modifiedCell.appendChild(check);
+      }
+    } 
+    else if (existingCheck) existingCheck.remove();
+  });
+}
+
+let selectedRow = null;
+
+function attachRowEvents(row) {
+  row.addEventListener('mouseenter', () => { if (row !== selectedRow) row.style.backgroundColor = '#f0f8ff'; });
+  row.addEventListener('mouseleave', () => { if (row !== selectedRow) row.style.backgroundColor = ''; });
+  row.addEventListener('click', () => {
+    if (selectedRow) selectedRow.classList.remove('selected-row');
+    selectedRow = row;
+    selectedRow.classList.add('selected-row');
+  });
+}
+
+document.querySelectorAll('td.editable').forEach(td => attachEditable(td));
+document.querySelectorAll('#resultsBody tr').forEach(row => attachRowEvents(row));
+
+// ---------------- إعادة تسلسل IDs ----------------
+function resequenceIDs() {
+    const rows = document.querySelectorAll('#resultsBody tr');
+    rows.forEach((row, index) => {
+        row.dataset.id = index + 1;
+        row.querySelector('td:first-child').textContent = index + 1;
+    });
+}
+
+// ---------------- إضافة عنصر جديد ----------------
+const addForm = document.getElementById('addForm');
+
+addForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const content = document.getElementById('addContent').value.trim();
+  if (!content && !fileInput.files.length) return alert("أضف نصًا أو ملفًا على الأقل");
+
+  const formData = new FormData();
+  formData.append('content', content);
+  if (fileInput.files[0]) formData.append('file', fileInput.files[0]);
+
+  try {
+    const res = await fetch("{{ url_for('add_item') }}", { method: 'POST', body: formData });
+    const data = await res.json();
+
+    if (data.success) {
+      const tbody = document.getElementById('resultsBody');
+      const newItem = data.new_item;
+
+      let fileHTML = "";
+      if (newItem.file_url) {
+        if (newItem.file_url.endsWith('.jpg') || newItem.file_url.endsWith('.png') || newItem.file_url.endsWith('.jpeg')) {
+          fileHTML = `<div class="file-preview"><img src="${newItem.file_url}" alt="file"></div>`;
+        } else {
+          fileHTML = `<div class="file-preview"><a href="${newItem.file_url}" target="_blank">📎 تحميل الملف</a></div>`;
+        }
+      }
+
+      const tr = document.createElement('tr');
+      tr.dataset.id = newItem.id;
+
+      tr.innerHTML = `
+        <td>${newItem.id}</td>
+        <td class="editable" contenteditable="false">
+            <span class="edit-text" contenteditable="true">${content}</span>
+            ${fileHTML}
+        </td>
+        <td class="modified-cell"></td>
+      `;
+
+      tbody.appendChild(tr);
+      attachEditable(tr.querySelector('.editable'));
+      attachRowEvents(tr);
+
+      document.getElementById('addContent').value = '';
+      fileInput.value = '';
+      fileLabelText.textContent = 'اختر ملفًا';
+
+      resequenceIDs();
+
+    } else alert("فشل الإضافة");
+    
+  } catch (err) {
+    console.error(err);
+    alert("حدث خطأ أثناء الإضافة");
+  }
+});
+
+// ---------------- حذف العنصر المحدد ----------------
+async function deleteSelected() {
+    if (!selectedRow) return alert("لم يتم تحديد صف");
+
+    if (!confirm("هل أنت متأكد من الحذف؟")) return;
+
+    const item_id = selectedRow.dataset.id;
+
+    try {
+        const response = await fetch(`/delete/${item_id}`, {
+            method: "POST"
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            selectedRow.remove();
+            selectedRow = null;
+            resequenceIDs();
+        } else {
+            alert("حدث خطأ أثناء الحذف");
+        }
+
+    } catch (error) {
+        alert("خطأ في الاتصال بالسيرفر");
+    }
+}
+
+// ---------------- البحث ----------------
+async function performSearch() {
+  const query = document.getElementById('searchQuery').value.trim();
+  const type = document.getElementById('searchType').value;
+  const tbody = document.getElementById('resultsBody');
+
+  const res = await fetch("{{ url_for('search') }}?q=" + encodeURIComponent(query) + "&by=" + type);
+  const data = await res.json();
+
+  tbody.innerHTML = '';
+
+  data.forEach((item, index) => {
+    let fileHTML = "";
+    if (item.file_url) {
+      if (item.file_url.endsWith('.jpg') || item.file_url.endsWith('.png') || item.file_url.endsWith('.jpeg')) {
+        fileHTML = `<div class="file-preview"><img src="${item.file_url}" alt="file"></div>`;
+      } else {
+        fileHTML = `<div class="file-preview"><a href="${item.file_url}" target="_blank">📎 تحميل الملف</a></div>`;
+      }
+    }
+
+    const tr = document.createElement('tr');
+    tr.dataset.id = item.id; // حافظ على ID الحقيقي
+
+    tr.innerHTML = `
+      <td>${item.id}</td>
+      <td class="editable" contenteditable="false">
+          <span class="edit-text" contenteditable="true">${item.content}</span>
+          ${fileHTML}
+      </td>
+      <td class="modified-cell"></td>
+    `;
+
+    tbody.appendChild(tr);
+    attachEditable(tr.querySelector('.editable'));
+    attachRowEvents(tr);
+  });
+}
+
+function searchOnInput() {
+  if (document.getElementById('searchQuery').value.trim() === '') performSearch();
+}
+
+</script>
+</body>
+</html>

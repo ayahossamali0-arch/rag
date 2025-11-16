@@ -41,7 +41,6 @@ fsspec==2025.9.0
 future==1.0.0
 google-auth==2.41.1
 googleapis-common-protos==1.70.0
-googletrans==4.0.0rc1
 gpt4all==2.8.2
 greenlet==3.2.4
 grpcio==1.75.1
@@ -195,6 +194,7 @@ yarl==1.22.0
 zipp==3.23.0
 zstandard==0.25.0
 # force render rebuild
+
 
 
 

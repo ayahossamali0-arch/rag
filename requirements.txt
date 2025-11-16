@@ -147,7 +147,6 @@ python-dateutil==2.9.0.post0
 python-docx==1.2.0
 python-dotenv==1.1.1
 pytz==2025.2
-pywin32==311
 PyYAML==6.0.3
 qdrant-client==1.15.1
 referencing==0.36.2
@@ -196,6 +195,7 @@ yarl==1.22.0
 zipp==3.23.0
 zstandard==0.25.0
 # force render rebuild
+
 
 
 
